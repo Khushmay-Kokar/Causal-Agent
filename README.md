@@ -17,9 +17,10 @@ the langraph causal model notebook contains the test notebook for the causal mod
 ```
 .
 ├── async.py                # code with asynchronous aspects
+├── sample.csv              # csv to use for analysis(later we will get it via the chatbot)
 ├── .env                    # API keys, environment vars
 ├── pyproject.toml          # Project dependencies
-├── main.py          	    # main code with no asynchronous aspects
+├── main.py          	      # main code with no asynchronous aspects
 ├── reports/                # Auto-generated PDFs and JSON
 └── README.md               # You are here
 ```
