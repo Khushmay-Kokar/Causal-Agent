@@ -1,6 +1,6 @@
 # Causal-Agent
 both synchronus and non synchronus version of the causal agent
-
+- **the main.py and async.py are the same but one main.py does not has asynchronous in it while async is asynchtonus so use main.py for the normal one **
 This project is an **async-first causal analysis engine** that:
 - Accepts structured data and a natural language question.
 - Performs CATE/ATE estimation, root cause analysis, and counterfactuals.
