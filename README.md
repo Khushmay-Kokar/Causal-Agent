@@ -60,6 +60,7 @@ Activate it:
 
 ```bash
 uv pip install -r pyproject.toml
+or uv add pyproject.toml
 and ensure pythin version is 3.10 or less
 or uv add .
 ```
