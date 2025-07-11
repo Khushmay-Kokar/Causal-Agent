@@ -5,9 +5,12 @@ This project is an **async-first causal analysis engine** that:
 - Accepts structured data and a natural language question.
 - Performs CATE/ATE estimation, root cause analysis, and counterfactuals.
 - Generates visual trees and a business-friendly PDF report.
+
+the langraph causal model notebook contains the test notebook for the causal model with langraph flow as shown
 ---
 # Instructions
 ## 🧰 Project Structure
+<img width="482" height="1264" alt="image" src="https://github.com/user-attachments/assets/659eb9a5-5069-4a16-a6aa-eda7a3281247" />
 
 ```
 .
@@ -54,7 +57,7 @@ Activate it:
 
 ```bash
 uv pip install -r pyproject.toml
-or uv add pyproject.toml
+and ensure pythin version is 3.10 or less
 or uv add .
 ```
 
@@ -74,7 +77,8 @@ source .venv/bin/activate  # Windows: .venv\Scripts\activate
 ### 2. Install dependencies
 
 ```bash
-pip install -r pyproject.toml
+pip install -r requirements.txt
+and ensure pythin version is 3.10 or less
 ```
 
 ---
