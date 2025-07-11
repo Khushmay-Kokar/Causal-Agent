@@ -6,7 +6,7 @@ This project is an **async-first causal analysis engine** that:
 - Performs CATE/ATE estimation, root cause analysis, and counterfactuals.
 - Generates visual trees and a business-friendly PDF report.
 
-**the langraph causal model notebook contains the test notebook for the causal model with langraph flow as shown**
+### **the langraph causal model notebook contains the test notebook for the causal model with langraph flow as shown**
 <img width="498" height="1277" alt="image" src="https://github.com/user-attachments/assets/1ef5cbb9-697f-4ae6-9c3a-7dee4c2dd8ba" />
 
 ---
