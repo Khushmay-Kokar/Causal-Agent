@@ -1,0 +1,1 @@
+{"duration": 32.380043745040894, "input_args": {"treatment": "'avg_hours'", "outcome": "'has_membership'", "controls": "['account_age', 'age', 'days_visited', 'friends_count', 'is_US', 'songs_purchased', 'income', 'price', 'demand']", "counterfactual_value": "None", "interpret": "False", "df_hash": "'4c9e45231ca49fcf069ae694a140c4de'"}, "time": 1752227670.5861359}
