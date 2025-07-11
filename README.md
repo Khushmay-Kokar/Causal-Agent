@@ -7,10 +7,12 @@ This project is an **async-first causal analysis engine** that:
 - Generates visual trees and a business-friendly PDF report.
 
 the langraph causal model notebook contains the test notebook for the causal model with langraph flow as shown
+<img width="498" height="1277" alt="image" src="https://github.com/user-attachments/assets/1ef5cbb9-697f-4ae6-9c3a-7dee4c2dd8ba" />
+
 ---
 # Instructions
 ## 🧰 Project Structure
-<img width="482" height="1264" alt="image" src="https://github.com/user-attachments/assets/659eb9a5-5069-4a16-a6aa-eda7a3281247" />
+
 
 ```
 .
