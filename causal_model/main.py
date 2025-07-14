@@ -85,6 +85,47 @@ from typing import Optional, Tuple, Dict
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 
+# def _preprocess(df: pd.DataFrame, groupby: Optional[str] = None) -> Tuple[pd.DataFrame, Optional[Dict[int, str]]]:
+#     """
+#     Cleans the DataFrame by:
+#     - Dropping fully missing columns
+#     - Parsing date strings
+#     - Label encoding object columns
+#     - Returning label mappings for the groupby column if specified
+    
+#     Returns:
+#         cleaned_df: pd.DataFrame
+#         group_mapping: Optional[Dict[int, str]] — e.g. {0: 'Male', 1: 'Female'}
+#     """
+#     df = df.copy()
+#     group_mapping = None
+
+#     # Drop fully missing columns
+#     df = df.dropna(axis=1, how="all")
+
+#     # Try parsing string columns as dates
+#     for col in df.select_dtypes("object"):
+#         sample = df[col].iloc[0]
+#         if isinstance(sample, str) and any(c in sample for c in ["-", "/"]):
+#             try:
+#                 df[col] = pd.to_datetime(df[col])
+#             except ValueError:
+#                 pass
+
+#     # Label encode object columns
+#     for col in df.select_dtypes("object"):
+#         le = LabelEncoder()
+#         df[col] = le.fit_transform(df[col].astype(str))
+#         if col == groupby:
+#             group_mapping = dict(enumerate(le.classes_))
+
+#     # Drop remaining NA rows
+#     df = df.dropna()
+
+#     return df, group_mapping
+
+# print("Preprocessing function defined")
+
 def _preprocess(df: pd.DataFrame, groupby: Optional[str] = None) -> Tuple[pd.DataFrame, Optional[Dict[int, str]]]:
     """
     Cleans the DataFrame by:
@@ -119,13 +160,18 @@ def _preprocess(df: pd.DataFrame, groupby: Optional[str] = None) -> Tuple[pd.Dat
         if col == groupby:
             group_mapping = dict(enumerate(le.classes_))
 
+    # Fallback: if group_mapping still None, generate it from unique values
+    if groupby and group_mapping is None and groupby in df.columns:
+        unique_vals = sorted(df[groupby].unique())
+        group_mapping = {int(v): f"{groupby} = {int(v)}" for v in unique_vals}
+
     # Drop remaining NA rows
     df = df.dropna()
 
     return df, group_mapping
 
 print("Preprocessing function defined")
-############################################
+# ############################################
 def _summarize_cate(cate: np.ndarray) -> Dict[str, Any]:
     return {
         "cate_mean": float(np.mean(cate)),
@@ -673,16 +719,71 @@ def run_causal_model(state: GraphState) -> GraphState:
 print("Run causal model node function defined")
 ############################################
 
-def explain_results(state: GraphState) -> GraphState:
-    import copy
-    import json
+# def explain_results(state: GraphState) -> GraphState:
+#     import copy
+#     import json
 
+#     params = state["extracted_params"]
+#     results = state["result"]
+#     question = state["user_question"]
+#     print("📌 explain result logs → question:", question)
+
+#     group_mapping = results.get("group_mapping", {})  # ✅ Optional group names
+#     groupby_column = results.get("groupby")
+
+#     def remap_group_keys(obj):
+#         if isinstance(obj, dict):
+#             return {
+#                 group_mapping.get(str(k), str(k)): remap_group_keys(v)
+#                 for k, v in obj.items()
+#             }
+#         elif isinstance(obj, list):
+#             return [remap_group_keys(i) for i in obj]
+#         return obj
+
+#     def strip_images(obj):
+#         if isinstance(obj, dict):
+#             return {
+#                 k: strip_images(v)
+#                 for k, v in obj.items()
+#                 if not (
+#                     isinstance(k, str) and (k.endswith("_png") or k in ["cate_interpreter_tree_png", "policy_tree"])
+#                 )
+#             }
+#         elif isinstance(obj, list):
+#             return [strip_images(i) for i in obj]
+#         return obj
+
+#     # ✅ First strip images
+#     cleaned_results = strip_images(copy.deepcopy(results))
+
+#     # ✅ Then remap group keys (0 → Male, etc.)
+#     cleaned_results = remap_group_keys(cleaned_results)
+
+#     try:
+#         explanation = explain_chain.invoke({
+#             "params": json.dumps(params.dict(), indent=2),
+#             "results": json.dumps(cleaned_results, indent=2),
+#             "question": question,
+#             "group_mapping": json.dumps(group_mapping, indent=2),  # 🧠 Give this to LLM
+#             "groupby_column": groupby_column
+#         })
+#         print("📋 Explanation generated ✅")
+#     except Exception as e:
+#         explanation = f"[Error generating explanation: {e}]"
+#         print("⚠️ Explanation failed:", explanation)
+
+#     state["explanation"] = explanation
+#     return state
+# print("Explain results node function defined")
+
+def explain_results(state: dict) -> dict:
     params = state["extracted_params"]
     results = state["result"]
     question = state["user_question"]
     print("📌 explain result logs → question:", question)
 
-    group_mapping = results.get("group_mapping", {})  # ✅ Optional group names
+    group_mapping = results.get("group_mapping") or {}  # <- Fix: fallback to empty dict
     groupby_column = results.get("groupby")
 
     def remap_group_keys(obj):
@@ -701,7 +802,8 @@ def explain_results(state: GraphState) -> GraphState:
                 k: strip_images(v)
                 for k, v in obj.items()
                 if not (
-                    isinstance(k, str) and (k.endswith("_png") or k in ["cate_interpreter_tree_png", "policy_tree"])
+                    isinstance(k, str)
+                    and (k.endswith("_png") or k in ["cate_interpreter_tree_png", "policy_tree"])
                 )
             }
         elif isinstance(obj, list):
@@ -711,7 +813,7 @@ def explain_results(state: GraphState) -> GraphState:
     # ✅ First strip images
     cleaned_results = strip_images(copy.deepcopy(results))
 
-    # ✅ Then remap group keys (0 → Male, etc.)
+    # ✅ Then remap group keys (e.g., 0 → Male)
     cleaned_results = remap_group_keys(cleaned_results)
 
     try:
@@ -719,7 +821,7 @@ def explain_results(state: GraphState) -> GraphState:
             "params": json.dumps(params.dict(), indent=2),
             "results": json.dumps(cleaned_results, indent=2),
             "question": question,
-            "group_mapping": json.dumps(group_mapping, indent=2),  # 🧠 Give this to LLM
+            "group_mapping": json.dumps(group_mapping, indent=2),
             "groupby_column": groupby_column
         })
         print("📋 Explanation generated ✅")
@@ -729,7 +831,9 @@ def explain_results(state: GraphState) -> GraphState:
 
     state["explanation"] = explanation
     return state
+
 print("Explain results node function defined")
+
 ############################################
 
 def run_interpretation(state: GraphState) -> GraphState:
@@ -1194,9 +1298,9 @@ def build_graph():
 
 print("Graph built")
 
-df = pd.read_csv("pricing_sample.csv")
+df = pd.read_csv("sample csv files\pricing_sample.csv")
 inputs = {
-    "user_question": "How does income affect demand for the products with visuals?",
+    "user_question": "How does friend affect demand for the products with visuals group by membership?",
     "df": df,
     "should_generate_pdf": True  # ← set True only when PDF is needed
 }
